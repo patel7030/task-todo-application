@@ -31,7 +31,7 @@ export default function Home() {
   const loadTodos = async (status: "all" | "active" | "completed" = "all") => {
     if (!user_id) return;
 
-    let url = `http://localhost:5000/todos?user_id=${user_id}`;
+    let url = `${process.env.NEXT_PUBLIC_API_URL}/todos?user_id=${user_id}`;
     if (status !== "all") url += `&status=${status}`;
 
     const res = await fetch(url);
@@ -47,7 +47,7 @@ export default function Home() {
   const addTodo = async () => {
     if (!task.trim()) return;
 
-    await fetch("http://localhost:5000/todos", {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/todos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ task, user_id }),
@@ -59,13 +59,13 @@ export default function Home() {
 
   // Delete Todo
   const deleteTodo = async (id: number) => {
-    await fetch(`http://localhost:5000/todos/${id}`, { method: "DELETE" });
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/todos/${id}`, { method: "DELETE" });
     loadTodos(filter);
   };
 
   // Complete Todo
   const completeTodo = async (id: number) => {
-    await fetch(`http://localhost:5000/todos/${id}`, {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/todos/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: "completed" }),
@@ -79,7 +79,7 @@ export default function Home() {
     const newTask = prompt("Edit your task:", oldTask);
     if (!newTask) return;
 
-    await fetch(`http://localhost:5000/todos/${id}`, {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/todos/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ task: newTask }),
@@ -160,12 +160,12 @@ export default function Home() {
           fontSize: "18px",
         }}
       >
-        {["all", "active", "completed"].map((tab) => (
+        {(["all", "active", "completed"] as const).map((tab) => (
           <span
             key={tab}
             onClick={() => {
-              setFilter(tab as any);
-              loadTodos(tab as any);
+              setFilter(tab);
+              loadTodos(tab);
             }}
             style={{
               cursor: "pointer",
