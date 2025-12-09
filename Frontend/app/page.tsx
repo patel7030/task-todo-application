@@ -17,7 +17,7 @@ export default function Home() {
     typeof window !== "undefined" ? localStorage.getItem("uid") : null;
 
   // Load todos
-  const loadTodos = async (status) => {
+const loadTodos = async (status: string) => {
     if (!user_id) return;
 
     let url = `http://localhost:5000/todos?user_id=${user_id}`;
