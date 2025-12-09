@@ -29,8 +29,8 @@ const loadTodos = async (status: string) => {
   };
 
   useEffect(() => {
-    if (user_id) loadTodos();
-  }, [user_id]);
+  if (user_id) loadTodos("all");
+}, [user_id]);
 
   const addTodo = async () => {
     if (!task.trim()) return;
