@@ -1,4 +1,4 @@
-// server.js
+// server.js (Railway Ready)
 import mysql from "mysql2/promise";
 import express from "express";
 import cors from "cors";
@@ -7,20 +7,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MySQL connection
+// MySQL connection for Railway
 const db = await mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "Himanshu@2001",
-    database: "Todolist",
+    host: process.env.MYSQLHOST,
+    user: process.env.MYSQLUSER,
+    password: process.env.MYSQLPASSWORD,
+    database: process.env.MYSQLDATABASE,
+    port: process.env.MYSQLPORT
 });
 
-console.log("MySQL connected successfully");
+console.log("MySQL Connected Successfully");
 
+// ROUTES --------------------------------------
 
-// Get todos for a specific user
-app.get("/todos", async(req, res) => {
-    const user_id = req.query.user_id; // required
+// Get todos
+app.get("/todos", async (req, res) => {
+    const user_id = req.query.user_id;
     const filter = req.query.status;
 
     if (!user_id) return res.status(400).json({ error: "user_id is required" });
@@ -37,32 +39,37 @@ app.get("/todos", async(req, res) => {
     res.json(rows);
 });
 
-
-// Add todo for a user
-app.post("/todos", async(req, res) => {
+// Add todos
+app.post("/todos", async (req, res) => {
     const { task, user_id } = req.body;
 
     if (!user_id) return res.status(400).json({ error: "user_id is required" });
 
     await db.query(
-        "INSERT INTO todos (task, status, user_id) VALUES (?, 'active', ?)", [task, user_id]
+        "INSERT INTO todos (task, status, user_id) VALUES (?, 'active', ?)",
+        [task, user_id]
     );
 
     res.json({ message: "Todo added!" });
 });
 
-
 // Update todo
-app.put("/todos/:id", async(req, res) => {
+app.put("/todos/:id", async (req, res) => {
     const { id } = req.params;
     const { status, task } = req.body;
 
     try {
         if (status) {
-            await db.query("UPDATE todos SET status = ? WHERE id = ?", [status, id]);
+            await db.query("UPDATE todos SET status = ? WHERE id = ?", [
+                status,
+                id
+            ]);
         }
         if (task) {
-            await db.query("UPDATE todos SET task = ? WHERE id = ?", [task, id]);
+            await db.query("UPDATE todos SET task = ? WHERE id = ?", [
+                task,
+                id
+            ]);
         }
         res.json({ message: "Todo updated!" });
     } catch (error) {
@@ -71,9 +78,8 @@ app.put("/todos/:id", async(req, res) => {
     }
 });
 
-
 // Soft delete
-app.delete("/todos/:id", async(req, res) => {
+app.delete("/todos/:id", async (req, res) => {
     const { id } = req.params;
 
     await db.query("UPDATE todos SET status = 'deleted' WHERE id = ?", [id]);
@@ -81,4 +87,6 @@ app.delete("/todos/:id", async(req, res) => {
     res.json({ message: "Todo deleted!" });
 });
 
-app.listen(5000, () => console.log("Server running at http://localhost:5000"));
+// START SERVER (Railway Port)
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
