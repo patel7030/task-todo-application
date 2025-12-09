@@ -1,8 +1,10 @@
 {
-  "build": {
-    "buildCommand": "cd Backend && npm install"
-  },
-  "deploy": {
-    "startCommand": "cd Backend && npm start"
-  }
+  "services": [
+    {
+      "name": "backend",
+      "buildCommand": "cd Backend && npm install",
+      "startCommand": "cd Backend && npm start",
+      "env": {}
+    }
+  ]
 }
