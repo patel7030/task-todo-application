@@ -1,15 +1,26 @@
 "use client";
+
 import { useEffect, useState } from "react";
 
-export default function Home() {
-  const [todos, setTodos] = useState([]);
-  const [task, setTask] = useState("");
-  const [filter, setFilter] = useState("all"); // all | active | completed
+// Define Todo Type
+interface Todo {
+  id: number;
+  task: string;
+  status: "active" | "completed";
+  date?: string;
+}
 
-  // Generate unique user ID on first visit
+export default function Home() {
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [task, setTask] = useState("");
+  const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
+
+  // Generate unique user ID
   useEffect(() => {
-    if (!localStorage.getItem("uid")) {
-      localStorage.setItem("uid", "user-" + Date.now());
+    if (typeof window !== "undefined") {
+      if (!localStorage.getItem("uid")) {
+        localStorage.setItem("uid", "user-" + Date.now());
+      }
     }
   }, []);
 
@@ -17,11 +28,11 @@ export default function Home() {
     typeof window !== "undefined" ? localStorage.getItem("uid") : null;
 
   // Load todos
-const loadTodos = async (status: string) => {
+  const loadTodos = async (status: "all" | "active" | "completed" = "all") => {
     if (!user_id) return;
 
     let url = `http://localhost:5000/todos?user_id=${user_id}`;
-    if (status && status !== "all") url += `&status=${status}`;
+    if (status !== "all") url += `&status=${status}`;
 
     const res = await fetch(url);
     const data = await res.json();
@@ -29,9 +40,10 @@ const loadTodos = async (status: string) => {
   };
 
   useEffect(() => {
-  if (user_id) loadTodos("all");
-}, [user_id]);
+    if (user_id) loadTodos("all");
+  }, [user_id]);
 
+  // Add Todo
   const addTodo = async () => {
     if (!task.trim()) return;
 
@@ -45,12 +57,14 @@ const loadTodos = async (status: string) => {
     loadTodos(filter);
   };
 
-  const deleteTodo = async (id) => {
+  // Delete Todo
+  const deleteTodo = async (id: number) => {
     await fetch(`http://localhost:5000/todos/${id}`, { method: "DELETE" });
     loadTodos(filter);
   };
 
-  const completeTodo = async (id) => {
+  // Complete Todo
+  const completeTodo = async (id: number) => {
     await fetch(`http://localhost:5000/todos/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -60,7 +74,8 @@ const loadTodos = async (status: string) => {
     loadTodos(filter);
   };
 
-  const editTodo = async (id, oldTask) => {
+  // Edit Todo
+  const editTodo = async (id: number, oldTask: string) => {
     const newTask = prompt("Edit your task:", oldTask);
     if (!newTask) return;
 
@@ -149,8 +164,8 @@ const loadTodos = async (status: string) => {
           <span
             key={tab}
             onClick={() => {
-              setFilter(tab);
-              loadTodos(tab);
+              setFilter(tab as any);
+              loadTodos(tab as any);
             }}
             style={{
               cursor: "pointer",
@@ -184,7 +199,6 @@ const loadTodos = async (status: string) => {
             Status : {todo.status}
           </p>
 
-          {/* --- BUTTONS IN ONE ROW --- */}
           <div
             style={{
               display: "flex",
